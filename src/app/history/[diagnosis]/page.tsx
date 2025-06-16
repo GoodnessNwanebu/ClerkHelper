@@ -42,7 +42,7 @@ export default function HistoryPage() {
             Generating history template
           </h3>
           <p className="mt-2 text-sm text-theme-fg-secondary">
-            Creating comprehensive questions for &ldquo;{diagnosis}&rdquo;
+            Creating comprehensive questions for &quot;{diagnosis}&quot;
           </p>
         </div>
       </div>

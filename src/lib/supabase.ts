@@ -30,7 +30,7 @@ export const createServerSupabaseClient = () => {
 // Helper functions for common operations
 export const supabaseHelpers = {
   // Cache a generated template
-  async cacheTemplate(template: any) {
+  async cacheTemplate(template: Database['public']['Tables']['history_templates']['Insert']) {
     const { data, error } = await supabase
       .from('history_templates')
       .insert([template])

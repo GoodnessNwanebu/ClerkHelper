@@ -29,9 +29,7 @@ export function SearchInterface() {
   };
 
   const handleSearch = (searchQuery?: string) => {
-    console.log('🔍 handleSearch called with:', { searchQuery, currentQuery: query });
     const finalQuery = sanitizeDiagnosis(searchQuery || query);
-    console.log('✅ Final query after sanitization:', finalQuery);
     
     if (!finalQuery.trim()) {
       toast.error('Please enter a diagnosis');
@@ -50,7 +48,6 @@ export function SearchInterface() {
 
     // Navigate to the dedicated history page
     const encodedDiagnosis = encodeURIComponent(finalQuery);
-    console.log('🚀 Navigating to:', `/history/${encodedDiagnosis}`);
     window.location.href = `/history/${encodedDiagnosis}`;
     
     setShowSuggestions(false);
@@ -139,10 +136,7 @@ export function SearchInterface() {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => {
-                      console.log('📱 Mobile button clicked! Current query:', query);
-                      handleSearch();
-                    }}
+                    onClick={() => handleSearch()}
                     disabled={!query.trim() || isLoading}
                     className={`inline-flex items-center gap-2 text-base font-medium transition-all duration-200 ${
                       !query.trim() || isLoading

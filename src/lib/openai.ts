@@ -122,23 +122,27 @@ Generate questions that help students take comprehensive, clinically relevant hi
     const parsed = JSON.parse(content);
     
     // Validate and format the response
-    const sections: HistorySection[] = parsed.sections.map((section: any, index: number) => ({
-      id: `section_${index + 1}`,
-      title: section.title,
-      questions: Array.isArray(section.questions) 
-        ? section.questions.map((q: any) => {
-            if (typeof q === 'string') {
-              return { question: q, hint: undefined };
-            }
-            return {
-              question: q.question || q,
-              hint: q.hint || undefined
-            };
-          })
-        : [],
-      order: section.order || index + 1,
-      is_specialty_specific: section.is_specialty_specific || false,
-    }));
+    const sections: HistorySection[] = parsed.sections.map((section: unknown, index: number) => {
+      const sectionData = section as Record<string, unknown>;
+      return {
+        id: `section_${index + 1}`,
+        title: sectionData.title as string,
+        questions: Array.isArray(sectionData.questions) 
+          ? sectionData.questions.map((q: unknown) => {
+              if (typeof q === 'string') {
+                return { question: q, hint: undefined };
+              }
+              const questionData = q as Record<string, unknown>;
+              return {
+                question: (questionData.question || q) as string,
+                hint: questionData.hint as string | undefined
+              };
+            })
+          : [],
+        order: (sectionData.order as number) || index + 1,
+        is_specialty_specific: (sectionData.is_specialty_specific as boolean) || false,
+      };
+    });
 
     // Determine specialty
     const specialtyName = parsed.specialty;

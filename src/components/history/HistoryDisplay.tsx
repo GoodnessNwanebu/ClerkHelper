@@ -167,7 +167,7 @@ export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayPr
         <div className="mt-12 sm:mt-16 p-4 sm:p-6 bg-amber-50/30 dark:bg-amber-950/20 border-l-4 border-amber-400/60 dark:border-amber-500/50">
           <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
             <strong>Disclaimer:</strong> This template is AI-generated and should be used as a guide only. 
-            Always verify clinical information independently and adapt questions based on your patient's specific presentation.
+            Always verify clinical information independently and adapt questions based on your patient&apos;s specific presentation.
           </p>
         </div>
       </div>

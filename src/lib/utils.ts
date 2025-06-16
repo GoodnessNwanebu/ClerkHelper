@@ -44,7 +44,7 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 // Debounce function for search
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
