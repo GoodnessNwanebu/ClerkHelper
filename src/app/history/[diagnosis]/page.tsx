@@ -21,10 +21,16 @@ export default function HistoryPage() {
   }, [diagnosis, search, template, searchState.loading]);
 
   useEffect(() => {
+    console.log('Search state changed:', {
+      loading: searchState.loading,
+      error: searchState.error,
+      hasData: !!searchState.data,
+      data: searchState.data
+    });
     if (searchState.data) {
       setTemplate(searchState.data);
     }
-  }, [searchState.data]);
+  }, [searchState.data, searchState.loading, searchState.error]);
 
   const handleBack = () => {
     router.push('/');

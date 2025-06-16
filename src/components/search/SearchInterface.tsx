@@ -116,8 +116,8 @@ export function SearchInterface() {
                 </Button>
               </div>
 
-              {/* Mobile Layout */}
-              <div className="sm:hidden space-y-4">
+              {/* Mobile Layout - Input Only */}
+              <div className="sm:hidden">
                 <div className="relative rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-xl shadow-blue-100/25 dark:shadow-slate-900/25 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-200/40 dark:hover:shadow-slate-900/40">
                   <Search className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500 transition-colors group-focus-within:text-blue-500" />
                   <Input
@@ -131,33 +131,33 @@ export function SearchInterface() {
                     disabled={isLoading}
                   />
                 </div>
-                
-                {/* Mobile Generate Link */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => handleSearch()}
-                    disabled={!query.trim() || isLoading}
-                    className={`inline-flex items-center gap-2 text-base font-medium transition-all duration-200 ${
-                      !query.trim() || isLoading
-                        ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                        : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 active:scale-95'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        Generate
-                      </>
-                    )}
-                  </button>
-                </div>
               </div>
+            </div>
+
+            {/* Mobile Generate Button - Outside the input group */}
+            <div className="sm:hidden mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => handleSearch()}
+                disabled={!query.trim() || isLoading}
+                className={`inline-flex items-center gap-2 text-base font-medium transition-all duration-200 py-3 px-4 min-h-[48px] touch-manipulation ${
+                  !query.trim() || isLoading
+                    ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 active:scale-95'
+                }`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Generate
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Suggestions Dropdown - Positioned ABOVE the input */}
