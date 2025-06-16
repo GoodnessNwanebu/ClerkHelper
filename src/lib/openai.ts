@@ -76,11 +76,10 @@ Please provide a comprehensive list of questions organized by appropriate histor
     }));
 
     // Determine specialty
-    let specialty: MedicalSpecialty;
     const specialtyName = parsed.specialty;
     
     // Map the LLM response to our enum
-    specialty = Object.values(MedicalSpecialty).find(
+    const specialty = Object.values(MedicalSpecialty).find(
       (s) => s.toLowerCase() === specialtyName.toLowerCase()
     ) || MedicalSpecialty.GENERAL;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Search, Loader2, ArrowRight, Clock, Sparkles } from 'lucide-react';
+import { Search, Loader2, Clock, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { HistoryDisplay } from '@/components/history/HistoryDisplay';
 import { useSearch } from '@/hooks/useSearch';
 import { debounce, sanitizeDiagnosis, storage } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { HistoryTemplate } from '@/types';
+
 
 export function SearchInterface() {
   const [query, setQuery] = useState('');
@@ -180,7 +180,7 @@ export function SearchInterface() {
                 Generating history template
               </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Creating comprehensive questions for "{searchState.query}"
+                Creating comprehensive questions for &ldquo;{searchState.query}&rdquo;
               </p>
               <div className="mt-4 flex items-center justify-center gap-1">
                 <div className="h-1 w-1 rounded-full bg-blue-400 animate-pulse"></div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { SearchState, HistoryTemplate, GenerateTemplateResponse } from '@/types';
+import type { SearchState, GenerateTemplateResponse } from '@/types';
 
 export function useSearch() {
   const [searchState, setSearchState] = useState<SearchState>({
@@ -49,7 +49,7 @@ export function useSearch() {
 
       setSearchState(prev => ({
         ...prev,
-        data: result.data,
+        data: result.data || null,
         loading: false,
         error: null,
       }));
