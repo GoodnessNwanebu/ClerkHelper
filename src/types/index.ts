@@ -22,10 +22,15 @@ export interface HistoryTemplate {
   cached: boolean;
 }
 
+export interface HistoryQuestion {
+  question: string;
+  hint?: string;
+}
+
 export interface HistorySection {
   id: string;
   title: string;
-  questions: string[];
+  questions: (string | HistoryQuestion)[];
   order: number;
   is_specialty_specific: boolean;
 }

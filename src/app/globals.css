@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme Variables */
+:root {
+  /* Light theme colors */
+  --background: 248 250 252; /* slate-50 */
+  --background-secondary: 255 255 255; /* white */
+  --background-tertiary: 241 245 249; /* slate-100 */
+  --foreground: 15 23 42; /* slate-900 */
+  --foreground-secondary: 51 65 85; /* slate-700 */
+  --foreground-muted: 100 116 139; /* slate-500 */
+  --border: 226 232 240; /* slate-200 */
+  --border-secondary: 241 245 249; /* slate-100 */
+  --accent: 59 130 246; /* blue-500 */
+  --accent-secondary: 37 99 235; /* blue-600 */
+  --glass-bg: 255 255 255; /* white with opacity */
+  --glass-border: 255 255 255; /* white with opacity */
+}
+
+[data-theme="dark"] {
+  /* Dark theme colors */
+  --background: 2 6 23; /* slate-950 */
+  --background-secondary: 15 23 42; /* slate-900 */
+  --background-tertiary: 30 41 59; /* slate-800 */
+  --foreground: 248 250 252; /* slate-50 */
+  --foreground-secondary: 203 213 225; /* slate-300 */
+  --foreground-muted: 148 163 184; /* slate-400 */
+  --border: 51 65 85; /* slate-700 */
+  --border-secondary: 71 85 105; /* slate-600 */
+  --accent: 96 165 250; /* blue-400 */
+  --accent-secondary: 59 130 246; /* blue-500 */
+  --glass-bg: 15 23 42; /* slate-900 with opacity */
+  --glass-border: 51 65 85; /* slate-700 with opacity */
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

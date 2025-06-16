@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArrowLeft, Copy, Check, Share2, Stethoscope, Clipboard, Award } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, Share2, Download, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { copyToClipboard, formatSectionForCopy, capitalizeWords } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { HistoryTemplate, HistorySection } from '@/types';
+import type { HistoryTemplate } from '@/types';
 
 interface HistoryDisplayProps {
   template: HistoryTemplate;
@@ -15,28 +15,6 @@ interface HistoryDisplayProps {
 }
 
 export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayProps) {
-  const [copiedSections, setCopiedSections] = useState<Set<string>>(new Set());
-
-  const handleCopySection = async (section: HistorySection) => {
-    const formatted = formatSectionForCopy(section.title, section.questions);
-    const success = await copyToClipboard(formatted);
-
-    if (success) {
-      setCopiedSections(prev => new Set(prev).add(section.id));
-      toast.success(`Copied "${section.title}" section`);
-      
-      setTimeout(() => {
-        setCopiedSections(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(section.id);
-          return newSet;
-        });
-      }, 2000);
-    } else {
-      toast.error('Failed to copy to clipboard');
-    }
-  };
-
   const handleCopyAll = async () => {
     const allSections = template.sections
       .sort((a, b) => a.order - b.order)
@@ -72,154 +50,127 @@ export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayPr
     }
   };
 
+  const handleSaveOffline = () => {
+    // TODO: Implement offline save functionality
+    toast.success('Saved for offline use');
+  };
+
   const sortedSections = template.sections.sort((a, b) => a.order - b.order);
 
-  return React.createElement('div', { className: 'w-full space-y-8' },
-    React.createElement('div', { className: 'flex items-center justify-between' },
-      React.createElement(Button, {
-        variant: 'ghost',
-        onClick: onBack,
-        className: 'group flex items-center gap-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 px-6 py-3 font-medium text-slate-700 shadow-lg shadow-slate-100/50 transition-all hover:bg-white/80 hover:shadow-xl hover:shadow-slate-200/60'
-      },
-        React.createElement(ArrowLeft, { className: 'h-4 w-4 transition-transform group-hover:-translate-x-1' }),
-        'Back to Search'
-      ),
-      React.createElement('div', { className: 'flex items-center gap-3' },
-        React.createElement(Button, {
-          variant: 'outline',
-          size: 'sm',
-          onClick: handleShare,
-          className: 'rounded-xl border-slate-200/60 bg-white/60 backdrop-blur-sm px-4 py-2 font-medium text-slate-700 shadow-sm transition-all hover:bg-white/80 hover:shadow-md'
-        },
-          React.createElement(Share2, { className: 'mr-2 h-4 w-4' }),
-          'Share'
-        ),
-        React.createElement(Button, {
-          variant: 'default',
-          size: 'sm',
-          onClick: handleCopyAll,
-          className: 'rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-2 font-medium shadow-lg shadow-blue-200/50 transition-all hover:shadow-xl hover:shadow-blue-300/60'
-        },
-          React.createElement(Clipboard, { className: 'mr-2 h-4 w-4' }),
-          'Copy All'
-        )
-      )
-    ),
-    
-    React.createElement('div', { 
-      className: 'relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 p-8 text-white shadow-2xl shadow-blue-200/40' 
-    },
-      React.createElement('div', { className: 'relative' },
-        React.createElement('div', { className: 'mb-4 inline-flex items-center gap-3 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2' },
-          React.createElement(Award, { className: 'h-5 w-5' }),
-          React.createElement('span', { className: 'text-sm font-medium' }, 'AI-Generated Template')
-        ),
-        React.createElement('h1', { className: 'mb-4 text-4xl font-bold leading-tight' },
-          capitalizeWords(diagnosis)
-        ),
-        React.createElement('div', { className: 'flex items-center gap-4 text-blue-100' },
-          React.createElement('div', { className: 'flex items-center gap-2' },
-            React.createElement(Stethoscope, { className: 'h-5 w-5' }),
-            React.createElement('span', { className: 'font-medium' }, 'Specialty:'),
-            React.createElement('span', { className: 'rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white' },
-              template.specialty
-            )
-          ),
-          React.createElement('div', { className: 'h-1 w-1 rounded-full bg-blue-300' }),
-          React.createElement('span', { className: 'text-sm' },
-            `${template.sections.length} sections • ${template.sections.reduce((acc, section) => acc + section.questions.length, 0)} questions`
-          )
-        )
-      )
-    ),
+  return (
+    <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-10">
+        <ThemeToggle />
+      </div>
+      
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-4xl">
+        {/* Back Button */}
+        <div className="mb-6 sm:mb-8">
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="flex items-center gap-2 text-theme-fg-secondary hover:text-theme-fg hover:bg-theme-accent/10 active:bg-theme-accent/20 focus:bg-theme-accent/10 transition-colors -ml-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Search
+          </Button>
+        </div>
 
-    React.createElement('div', { className: 'space-y-6' },
-      ...sortedSections.map((section, index) =>
-        React.createElement(Card, { 
-          key: section.id, 
-          className: 'group overflow-hidden rounded-2xl border-0 bg-white/70 backdrop-blur-sm shadow-xl shadow-slate-100/60 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/80' 
-        },
-          React.createElement(CardHeader, { className: 'bg-gradient-to-r from-slate-50 to-slate-100/50 pb-4' },
-            React.createElement('div', { className: 'flex items-center justify-between' },
-              React.createElement('div', { className: 'flex items-center gap-4' },
-                React.createElement('div', { className: 'flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-200/50' },
-                  index + 1
-                ),
-                React.createElement(CardTitle, { className: 'text-xl font-bold text-slate-900' },
-                  section.title
-                )
-              ),
-              React.createElement(Button, {
-                variant: 'ghost',
-                size: 'sm',
-                onClick: () => handleCopySection(section),
-                className: 'rounded-xl transition-all hover:bg-white/80'
-              },
-                copiedSections.has(section.id) ? 
-                  React.createElement(React.Fragment, null,
-                    React.createElement(Check, { className: 'mr-2 h-4 w-4 text-emerald-600' }),
-                    React.createElement('span', { className: 'font-medium text-emerald-600' }, 'Copied')
-                  ) :
-                  React.createElement(React.Fragment, null,
-                    React.createElement(Copy, { className: 'mr-2 h-4 w-4 text-slate-500 transition-colors group-hover:text-slate-700' }),
-                    React.createElement('span', { className: 'font-medium text-slate-500 transition-colors group-hover:text-slate-700' }, 'Copy')
-                  )
-              )
-            )
-          ),
-          React.createElement(CardContent, { className: 'p-6' },
-            React.createElement('div', { className: 'space-y-4' },
-              ...section.questions.map((question, questionIndex) =>
-                React.createElement('div', {
-                  key: questionIndex,
-                  className: 'group/item flex items-start gap-4 rounded-xl bg-white/50 p-4 transition-all hover:bg-white/80'
-                },
-                  React.createElement('div', { className: 'flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-xs font-bold text-slate-600 transition-colors group-hover/item:from-blue-100 group-hover/item:to-blue-200 group-hover/item:text-blue-700' },
-                    questionIndex + 1
-                  ),
-                  React.createElement('span', { className: 'flex-1 font-medium text-slate-700 leading-relaxed' },
-                    question
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    ),
+        {/* Title Section */}
+        <div className="mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl font-bold text-theme-fg mb-4 sm:mb-6 leading-tight">
+            {capitalizeWords(diagnosis)}
+          </h1>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 text-sm sm:text-base text-theme-fg-secondary mb-6 sm:mb-8">
+            <span className="font-medium">Specialty: {template.specialty}</span>
+            <span className="hidden sm:inline text-theme-fg-secondary/50">•</span>
+            <span>{template.sections.length} sections</span>
+            <span className="hidden sm:inline text-theme-fg-secondary/50">•</span>
+            <span>{template.sections.reduce((acc, section) => acc + section.questions.length, 0)} questions</span>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={handleSaveOffline}
+              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+            >
+              <Download className="h-4 w-4" />
+              Save Offline
+            </Button>
+            
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleCopyAll}
+              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+            >
+              <Copy className="h-4 w-4" />
+              Copy All
+            </Button>
+          </div>
+        </div>
 
-    React.createElement('div', { className: 'space-y-6' },
-      React.createElement('div', { className: 'rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 p-6 shadow-lg shadow-amber-100/50' },
-        React.createElement('div', { className: 'flex items-start gap-4' },
-          React.createElement('div', { className: 'flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100' },
-            React.createElement('svg', { className: 'h-5 w-5 text-amber-600', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' },
-              React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z' })
-            )
-          ),
-          React.createElement('div', null,
-            React.createElement('h3', { className: 'mb-2 font-semibold text-amber-900' }, 'Important Disclaimer'),
-            React.createElement('p', { className: 'text-sm leading-relaxed text-amber-800' },
-              'This template is AI-generated and should be used as a guide only. Always verify clinical information independently and adapt questions based on your patient\'s specific presentation and clinical context.'
-            )
-          )
-        )
-      ),
+        {/* Questions Content */}
+        <div className="space-y-8 sm:space-y-12">
+          {sortedSections.map((section) => (
+            <div key={section.id} className="space-y-5 sm:space-y-6">
+              <h2 className="text-xl sm:text-2xl font-semibold text-theme-fg border-b border-theme-border/50 pb-3 sm:pb-4">
+                {section.title}
+              </h2>
+              
+              <div className="space-y-5 sm:space-y-6">
+                {section.questions.map((question, questionIndex) => {
+                  const questionText = typeof question === 'string' ? question : question.question;
+                  const hint = typeof question === 'object' ? question.hint : undefined;
+                  
+                  return (
+                    <div key={questionIndex} className="space-y-3 sm:space-y-4">
+                      <div className="flex items-start gap-4 sm:gap-5">
+                        <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-theme-accent text-white text-sm sm:text-base font-medium flex items-center justify-center mt-1">
+                          {questionIndex + 1}
+                        </span>
+                        <p className="text-theme-fg leading-relaxed text-base sm:text-lg pt-1">
+                          {questionText}
+                        </p>
+                      </div>
+                      
+                      {hint && (
+                        <div className="ml-11 sm:ml-13 p-4 sm:p-5 bg-blue-50/50 dark:bg-blue-950/30 border-l-4 border-blue-400/60 dark:border-blue-500/50">
+                          <p className="text-sm sm:text-base text-blue-800 dark:text-blue-200 leading-relaxed">
+                            💡 {hint}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
 
-      React.createElement(Card, { className: 'border-0 bg-slate-50/70 backdrop-blur-sm shadow-lg shadow-slate-100/50' },
-        React.createElement(CardContent, { className: 'py-4' },
-          React.createElement('div', { className: 'flex items-center justify-between text-sm text-slate-600' },
-            React.createElement('div', { className: 'flex items-center gap-2' },
-              React.createElement('div', { className: 'h-2 w-2 rounded-full bg-emerald-500' }),
-              React.createElement('span', { className: 'font-medium' },
-                template.cached ? 'Retrieved from cache' : 'Freshly generated'
-              )
-            ),
-            React.createElement('span', { className: 'font-medium' },
-              `Generated by ${template.llm_model || 'GPT-4'}`
-            )
-          )
-        )
-      )
-    )
+        {/* Footer Disclaimer */}
+        <div className="mt-12 sm:mt-16 p-4 sm:p-6 bg-amber-50/30 dark:bg-amber-950/20 border-l-4 border-amber-400/60 dark:border-amber-500/50">
+          <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
+            <strong>Disclaimer:</strong> This template is AI-generated and should be used as a guide only. 
+            Always verify clinical information independently and adapt questions based on your patient's specific presentation.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 } 

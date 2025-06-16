@@ -134,6 +134,17 @@ export const storage = {
 };
 
 // Format history section for copying
-export function formatSectionForCopy(title: string, questions: string[]): string {
-  return `${title}:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n`;
+export function formatSectionForCopy(title: string, questions: (string | { question: string; hint?: string })[]): string {
+  const formattedQuestions = questions.map((q, i) => {
+    const questionText = typeof q === 'string' ? q : q.question;
+    const hint = typeof q === 'object' ? q.hint : undefined;
+    
+    let formatted = `${i + 1}. ${questionText}`;
+    if (hint) {
+      formatted += `\n   💡 ${hint}`;
+    }
+    return formatted;
+  });
+  
+  return `${title}:\n${formattedQuestions.join('\n')}\n`;
 } 

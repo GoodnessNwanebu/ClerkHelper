@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config = {
-  darkMode: ["class"],
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -59,6 +59,29 @@ const config = {
           success: "#16a34a", // Green
           warning: "#ea580c", // Orange
           danger: "#dc2626", // Red
+        },
+        // Theme-aware colors using CSS variables
+        'theme-bg': {
+          DEFAULT: 'rgb(var(--background))',
+          secondary: 'rgb(var(--background-secondary))',
+          tertiary: 'rgb(var(--background-tertiary))',
+        },
+        'theme-fg': {
+          DEFAULT: 'rgb(var(--foreground))',
+          secondary: 'rgb(var(--foreground-secondary))',
+          muted: 'rgb(var(--foreground-muted))',
+        },
+        'theme-border': {
+          DEFAULT: 'rgb(var(--border))',
+          secondary: 'rgb(var(--border-secondary))',
+        },
+        'theme-accent': {
+          DEFAULT: 'rgb(var(--accent))',
+          secondary: 'rgb(var(--accent-secondary))',
+        },
+        'theme-glass': {
+          bg: 'rgb(var(--glass-bg))',
+          border: 'rgb(var(--glass-border))',
         }
       },
       borderRadius: {
