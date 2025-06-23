@@ -5,7 +5,7 @@ import { ArrowLeft, Share2, Download, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { copyToClipboard, formatSectionForCopy, capitalizeWords } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast, toastPatterns } from '@/lib/toast';
 import type { HistoryTemplate } from '@/types';
 
 interface HistoryDisplayProps {
@@ -25,9 +25,9 @@ export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayPr
     
     const success = await copyToClipboard(fullTemplate);
     if (success) {
-      toast.success('Copied complete history template');
+      toastPatterns.copied.template();
     } else {
-      toast.error('Failed to copy to clipboard');
+      toastPatterns.errors.clipboard();
     }
   };
 
@@ -39,20 +39,23 @@ export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayPr
           text: `History template for ${diagnosis}`,
           url: window.location.href,
         });
+        toastPatterns.shared.general();
       } catch (error) {
-        // User cancelled sharing
+        // User cancelled sharing - don't show error
       }
     } else {
       const success = await copyToClipboard(window.location.href);
       if (success) {
-        toast.success('Link copied to clipboard');
+        toastPatterns.shared.link();
+      } else {
+        toastPatterns.errors.clipboard();
       }
     }
   };
 
   const handleSaveOffline = () => {
     // TODO: Implement offline save functionality
-    toast.success('Saved for offline use');
+    toastPatterns.saved.offline();
   };
 
   const sortedSections = template.sections.sort((a, b) => a.order - b.order);
@@ -96,30 +99,30 @@ export function HistoryDisplay({ template, diagnosis, onBack }: HistoryDisplayPr
               variant="outline"
               size="sm"
               onClick={handleShare}
-              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+              className="group relative flex items-center justify-center gap-3 h-12 sm:h-11 px-6 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-blue-100/25 dark:shadow-slate-900/25 hover:shadow-xl hover:shadow-blue-200/40 dark:hover:shadow-slate-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300/50 dark:hover:border-blue-600/50"
             >
-              <Share2 className="h-4 w-4" />
-              Share
+              <Share2 className="h-5 w-5 transition-transform group-hover:scale-110" />
+              <span className="font-medium">Share Template</span>
             </Button>
             
             <Button
               variant="outline" 
               size="sm"
               onClick={handleSaveOffline}
-              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+              className="group relative flex items-center justify-center gap-3 h-12 sm:h-11 px-6 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-emerald-100/25 dark:shadow-slate-900/25 hover:shadow-xl hover:shadow-emerald-200/40 dark:hover:shadow-slate-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300/50 dark:hover:border-emerald-600/50"
             >
-              <Download className="h-4 w-4" />
-              Save Offline
+              <Download className="h-5 w-5 transition-transform group-hover:scale-110" />
+              <span className="font-medium">Save Offline</span>
             </Button>
             
             <Button
               variant="default"
               size="sm"
               onClick={handleCopyAll}
-              className="flex items-center justify-center gap-2 h-10 sm:h-9"
+              className="group relative flex items-center justify-center gap-3 h-12 sm:h-11 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border-0"
             >
-              <Copy className="h-4 w-4" />
-              Copy All
+              <Copy className="h-5 w-5 transition-transform group-hover:scale-110" />
+              <span className="font-medium">Copy All</span>
             </Button>
           </div>
         </div>
