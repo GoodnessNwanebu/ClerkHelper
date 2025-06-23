@@ -1,41 +1,30 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { HistoryDisplay } from '@/components/history/HistoryDisplay';
 import { useSearch } from '@/hooks/useSearch';
 import { Loader2 } from 'lucide-react';
-import type { HistoryTemplate } from '@/types';
 
 export default function HistoryPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const diagnosis = decodeURIComponent(params.diagnosis as string);
+  const specialty = searchParams.get('specialty') || 'general';
   const { search, searchState } = useSearch();
-  const [template, setTemplate] = useState<HistoryTemplate | null>(null);
 
   useEffect(() => {
-    if (diagnosis && !template && !searchState.loading) {
-      search(diagnosis);
+    if (diagnosis && !searchState.hasSearched && !searchState.loading) {
+      search(diagnosis, specialty);
     }
-  }, [diagnosis, search, template, searchState.loading]);
-
-  useEffect(() => {
-    console.log('Search state changed:', {
-      loading: searchState.loading,
-      error: searchState.error,
-      hasData: !!searchState.data,
-      data: searchState.data
-    });
-    if (searchState.data) {
-      setTemplate(searchState.data);
-    }
-  }, [searchState.data, searchState.loading, searchState.error]);
+  }, [diagnosis, specialty, search, searchState.hasSearched, searchState.loading]);
 
   const handleBack = () => {
     router.push('/');
   };
 
+  // Show loading state while generating
   if (searchState.loading) {
     return (
       <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
@@ -49,12 +38,18 @@ export default function HistoryPage() {
           </h3>
           <p className="mt-2 text-sm text-theme-fg-secondary">
             Creating comprehensive questions for &quot;{diagnosis}&quot;
+            {specialty !== 'general' && (
+              <span className="block mt-1 text-xs">
+                Specialty: {specialty === 'pediatrics' ? 'Pediatrics' : specialty === 'obs_gyn' ? 'Obstetrics & Gynecology' : specialty}
+              </span>
+            )}
           </p>
         </div>
       </div>
     );
   }
 
+  // Show error state if there was an error
   if (searchState.error) {
     return (
       <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
@@ -81,27 +76,32 @@ export default function HistoryPage() {
     );
   }
 
-  if (!template) {
+  // Show template if we have data
+  if (searchState.data) {
     return (
-      <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-theme-fg-secondary">No template found</p>
-          <button
-            onClick={handleBack}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Search
-          </button>
-        </div>
-      </div>
+      <HistoryDisplay
+        template={searchState.data}
+        diagnosis={diagnosis}
+        onBack={handleBack}
+      />
     );
   }
 
+  // Initial state - should trigger the search effect
   return (
-    <HistoryDisplay
-      template={template}
-      diagnosis={diagnosis}
-      onBack={handleBack}
-    />
+    <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+      <div className="text-center">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-xl"></div>
+          <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600" />
+        </div>
+        <h3 className="mt-6 text-lg font-semibold text-theme-fg">
+          Preparing to generate template
+        </h3>
+        <p className="mt-2 text-sm text-theme-fg-secondary">
+          Initializing for &quot;{diagnosis}&quot;
+        </p>
+      </div>
+    </div>
   );
 } 

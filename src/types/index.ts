@@ -25,6 +25,7 @@ export interface HistoryTemplate {
 export interface HistoryQuestion {
   question: string;
   hint?: string;
+  clinical_rationale?: string;
 }
 
 export interface HistorySection {
@@ -41,10 +42,21 @@ export interface SearchResult {
   confidence_score?: number;
 }
 
+export interface ClinicalReasoning {
+  epidemiology: string;
+  risk_factors: string[];
+  pathophysiology_notes: string;
+  clinical_features: string[];
+  complications: string[];
+  differentials: string[];
+  red_flags: string[];
+}
+
 export interface LLMResponse {
   specialty: MedicalSpecialty;
   sections: HistorySection[];
   diagnosis_name: string;
+  clinical_reasoning?: ClinicalReasoning;
   success: boolean;
   error?: string;
   model_used: string;
@@ -95,6 +107,7 @@ export interface APIResponse<T> {
 
 export interface GenerateTemplateRequest {
   diagnosis: string;
+  specialty?: string;
   specialty_hint?: MedicalSpecialty;
   use_cache?: boolean;
 }

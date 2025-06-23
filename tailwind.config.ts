@@ -82,7 +82,8 @@ const config = {
         'theme-glass': {
           bg: 'rgb(var(--glass-bg))',
           border: 'rgb(var(--glass-border))',
-        }
+        },
+        'theme-bg-secondary': 'rgb(241 245 249)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -105,6 +106,36 @@ const config = {
       },
       fontFamily: {
         sans: ['Inter', 'SF Pro Text', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'fluid-xs': 'clamp(0.625rem, 2.5vw, 0.75rem)',
+        'fluid-sm': 'clamp(0.75rem, 3vw, 0.875rem)',
+        'fluid-base': 'clamp(0.875rem, 4vw, 1rem)',
+        'fluid-lg': 'clamp(1rem, 4vw, 1.125rem)',
+        'fluid-xl': 'clamp(1.125rem, 5vw, 1.25rem)',
+        'fluid-2xl': 'clamp(1.25rem, 6vw, 1.5rem)',
+        'fluid-3xl': 'clamp(1.5rem, 7vw, 1.875rem)',
+        'fluid-4xl': 'clamp(1.875rem, 8vw, 2.25rem)',
+        'fluid-5xl': 'clamp(2.25rem, 10vw, 3rem)',
+        'fluid-6xl': 'clamp(2.5rem, 12vw, 4rem)',
+      },
+      spacing: {
+        'fluid-1': 'clamp(0.25rem, 1vw, 0.5rem)',
+        'fluid-2': 'clamp(0.5rem, 2vw, 1rem)',
+        'fluid-3': 'clamp(0.75rem, 3vw, 1.5rem)',
+        'fluid-4': 'clamp(1rem, 4vw, 2rem)',
+        'fluid-6': 'clamp(1.5rem, 6vw, 3rem)',
+        'fluid-8': 'clamp(2rem, 8vw, 4rem)',
+        'fluid-12': 'clamp(3rem, 12vw, 6rem)',
+        'fluid-16': 'clamp(4rem, 16vw, 8rem)',
+      },
+      screens: {
+        'xs': '375px',      // iPhone SE and similar small devices
+        'sm': '640px',      // Small tablets
+        'md': '768px',      // Tablets
+        'lg': '1024px',     // Small laptops
+        'xl': '1280px',     // Laptops
+        '2xl': '1536px',    // Large screens
       },
     },
   },

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateHistoryTemplate, validateDiagnosisInput } from '@/lib/openai';
-import { supabaseHelpers, createServerSupabaseClient } from '@/lib/supabase';
-import { generateId } from '@/lib/utils';
-import type { GenerateTemplateRequest, GenerateTemplateResponse, HistoryTemplate } from '@/types';
+import type { GenerateTemplateRequest, GenerateTemplateResponse } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateTemplateRequest = await request.json();
-    const { diagnosis, specialty_hint, use_cache = true } = body;
+    const { diagnosis, specialty, specialty_hint } = body;
+    
+    // Use specialty parameter if provided, otherwise fall back to specialty_hint
+    const finalSpecialty = specialty || specialty_hint;
 
     // Validate input
     const validation = validateDiagnosisInput(diagnosis);
@@ -20,49 +21,26 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // Check cache first if requested
-    let cachedTemplate = null;
-    if (use_cache) {
-      try {
-        cachedTemplate = await supabaseHelpers.getCachedTemplate(diagnosis.toLowerCase());
-      } catch (error) {
-        console.warn('Cache check failed:', error);
-        // Continue without cache
-      }
+    // Map specialty from frontend values to backend format
+    let specialtyHint: string | undefined;
+    
+    if (finalSpecialty === 'pediatrics') {
+      specialtyHint = 'pediatrics';
+    } else if (finalSpecialty === 'obs_gyn') {
+      specialtyHint = 'obstetrics_gynecology';
+    } else {
+      // Default to general or undefined for general cases
+      specialtyHint = undefined;
     }
 
-    if (cachedTemplate) {
-      // Update access statistics
-      try {
-        await supabaseHelpers.updateTemplateStats(cachedTemplate.id);
-      } catch (error) {
-        console.warn('Failed to update template stats:', error);
-      }
-
-      // Transform database row to HistoryTemplate
-      const template: HistoryTemplate = {
-        id: cachedTemplate.id,
-        diagnosis_id: cachedTemplate.diagnosis_id || '',
-        diagnosis_name: cachedTemplate.diagnosis_name,
-        specialty: cachedTemplate.specialty,
-        sections: cachedTemplate.sections,
-        generated_by: cachedTemplate.generated_by,
-        llm_model: cachedTemplate.llm_model,
-        created_at: cachedTemplate.created_at,
-        updated_at: cachedTemplate.updated_at,
-        cached: true,
-      };
-
-      return NextResponse.json<GenerateTemplateResponse>({
-        success: true,
-        data: template,
-        from_cache: true,
-        generation_time: Date.now() - startTime,
-      });
-    }
+    console.log('Generating template for:', { 
+      diagnosis, 
+      originalSpecialty: finalSpecialty, 
+      mappedSpecialty: specialtyHint 
+    });
 
     // Generate new template using OpenAI
-    const llmResponse = await generateHistoryTemplate(diagnosis, specialty_hint);
+    const llmResponse = await generateHistoryTemplate(diagnosis, specialtyHint);
 
     if (!llmResponse.success) {
       return NextResponse.json<GenerateTemplateResponse>({
@@ -71,44 +49,21 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Create template object
-    const template: HistoryTemplate = {
-      id: generateId(),
-      diagnosis_id: '', // We'll set this later if we implement diagnosis management
-      diagnosis_name: llmResponse.diagnosis_name,
-      specialty: llmResponse.specialty,
-      sections: llmResponse.sections,
-      generated_by: 'llm',
-      llm_model: llmResponse.model_used,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      cached: false,
-    };
-
-    // Cache the template for future use
-    try {
-      const supabaseClient = createServerSupabaseClient();
-      await supabaseClient.from('history_templates').insert([{
-        id: template.id,
-        diagnosis_name: template.diagnosis_name.toLowerCase(),
-        specialty: template.specialty,
-        sections: template.sections,
-        generated_by: template.generated_by,
-        llm_model: template.llm_model,
-        cached: true,
-        access_count: 1,
-        last_accessed: new Date().toISOString(),
-      }]);
-
-      template.cached = true;
-    } catch (error) {
-      console.error('Failed to cache template:', error);
-      // Continue without caching - don't fail the request
-    }
-
+    // Return the LLM response with generation time
     return NextResponse.json<GenerateTemplateResponse>({
       success: true,
-      data: template,
+      data: {
+        id: `temp_${Date.now()}`,
+        diagnosis_id: '',
+        diagnosis_name: llmResponse.diagnosis_name,
+        specialty: llmResponse.specialty,
+        sections: llmResponse.sections,
+        generated_by: 'llm',
+        llm_model: llmResponse.model_used,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        cached: false,
+      },
       from_cache: false,
       generation_time: Date.now() - startTime,
     });
@@ -121,6 +76,13 @@ export async function POST(request: NextRequest) {
       error: 'Internal server error',
     }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method not allowed. Use POST to generate templates.' },
+    { status: 405 }
+  );
 }
 
 // Handle preflight requests for CORS

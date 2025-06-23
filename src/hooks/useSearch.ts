@@ -12,7 +12,9 @@ export function useSearch() {
     hasSearched: false,
   });
 
-  const search = useCallback(async (query: string) => {
+  const search = useCallback(async (query: string, specialty: string = 'general') => {
+    console.log('🔍 Search initiated:', { query: query.trim(), specialty });
+    
     setSearchState(prev => ({
       ...prev,
       loading: true,
@@ -22,6 +24,7 @@ export function useSearch() {
     }));
 
     try {
+      console.log('📡 Making API request to /api/generate-template');
       const response = await fetch('/api/generate-template', {
         method: 'POST',
         headers: {
@@ -29,6 +32,7 @@ export function useSearch() {
         },
         body: JSON.stringify({
           diagnosis: query.trim(),
+          specialty: specialty,
           use_cache: true,
         }),
       });
@@ -38,6 +42,11 @@ export function useSearch() {
       }
 
       const result: GenerateTemplateResponse = await response.json();
+      console.log('✅ API response received:', { 
+        success: result.success, 
+        hasData: !!result.data,
+        specialty: result.data?.specialty 
+      });
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to generate template');
