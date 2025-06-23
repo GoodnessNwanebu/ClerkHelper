@@ -5,7 +5,7 @@ import { ArrowLeft, Share2, Download, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { copyToClipboard, formatSectionForCopy, capitalizeWords } from '@/lib/utils';
-import { toast, toastPatterns } from '@/lib/toast';
+import { toastPatterns } from '@/lib/toast';
 import type { HistoryTemplate } from '@/types';
 
 interface HistoryDisplayProps {

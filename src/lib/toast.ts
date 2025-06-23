@@ -247,10 +247,10 @@ export const toastUtils = {
     options: {
       loading: string;
       success: string | ((data: T) => string);
-      error: string | ((error: any) => string);
+      error: string | ((error: Error) => string);
       loadingDescription?: string;
       successDescription?: string | ((data: T) => string);
-      errorDescription?: string | ((error: any) => string);
+      errorDescription?: string | ((error: Error) => string);
     }
   ) => {
     return sonnerToast.promise(promise, {
