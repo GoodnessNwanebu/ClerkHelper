@@ -47,10 +47,10 @@ export function SearchInterface() {
     ].slice(0, 10);
     storage.set('recentSearches', updatedSearches);
 
-    // Navigate to the dedicated history page with specialty context
+    // Navigate to the dedicated HPC page with specialty context
     const encodedDiagnosis = encodeURIComponent(finalQuery);
     const specialtyParam = specialty !== 'general' ? `?specialty=${specialty}` : '';
-    window.location.href = `/history/${encodedDiagnosis}${specialtyParam}`;
+    window.location.href = `/hpc/${encodedDiagnosis}${specialtyParam}`;
     
     setShowSuggestions(false);
   };
@@ -166,7 +166,7 @@ export function SearchInterface() {
                   ) : (
                     <>
                       <Sparkles className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="hidden xs:inline">Generate</span>
+                      <span className="hidden xs:inline">Get HPC</span>
                       <span className="xs:hidden">Go</span>
                     </>
                   )}
@@ -220,7 +220,7 @@ export function SearchInterface() {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Generate Template
+                    Get HPC Guide
                   </>
                 )}
               </button>

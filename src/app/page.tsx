@@ -35,7 +35,10 @@ export default function Home() {
             {/* Instruction Text */}
             <div className="mb-fluid-6 text-center px-2">
               <p className="text-fluid-xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                Generate comprehensive history templates for any diagnosis
+                Master the History of Presenting Complaint for any diagnosis
+              </p>
+              <p className="text-fluid-sm text-slate-600 dark:text-slate-400 mt-2">
+                Get specific presenting complaints and targeted questions to ask
               </p>
             </div>
 

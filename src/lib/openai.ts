@@ -526,6 +526,108 @@ export function estimateTokenCount(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
+// Generate HPC-focused content using GPT-4o mini
+export async function generateHPCContent(
+  diagnosis: string,
+  specialtyHint?: string
+): Promise<{
+  success: boolean;
+  data?: {
+    diagnosis: string;
+    specialty: string;
+    presenting_complaints: Array<{
+      complaint: string;
+      description: string;
+      questions: Array<{
+        question: string;
+        rationale: string;
+      }>;
+    }>;
+  };
+  error?: string;
+}> {
+  try {
+    // Map specialty for context
+    let specialtyContext = 'general medicine';
+    let nigerianContext = '';
+    
+    if (specialtyHint === 'obstetrics_gynecology') {
+      specialtyContext = 'obstetrics and gynecology';
+      nigerianContext = 'Consider Nigerian healthcare context including common conditions like malaria in pregnancy, limited ultrasound access, traditional birth practices, and family planning challenges.';
+    } else if (specialtyHint === 'pediatrics') {
+      specialtyContext = 'pediatrics';
+      nigerianContext = 'Consider Nigerian pediatric context including malnutrition, malaria, vaccination schedules, traditional medicine use, and family dynamics in child care.';
+    } else {
+      nigerianContext = 'Consider Nigerian healthcare context including common tropical diseases, limited diagnostic resources, and traditional medicine practices.';
+    }
+
+    const systemPrompt = `You are a senior Nigerian consultant physician specializing in ${specialtyContext}. You have extensive experience teaching medical students how to take focused histories of presenting complaints.
+
+Your task is to help medical students master the History of Presenting Complaint (HPC) by providing:
+1. The most common presenting complaints for a given diagnosis
+2. Specific, targeted questions to ask for each presenting complaint
+3. Clinical rationale for why each question is important
+
+${nigerianContext}
+
+You must respond in valid JSON format only.`;
+
+    const userPrompt = `For the diagnosis "${diagnosis}", provide the most common presenting complaints and specific questions to ask for each complaint.
+
+Focus on the History of Presenting Complaint (HPC) - the detailed exploration of symptoms.
+
+Provide your response in this exact JSON format:
+{
+  "diagnosis": "${diagnosis}",
+  "specialty": "${specialtyContext}",
+  "presenting_complaints": [
+    {
+      "complaint": "Name of the presenting complaint",
+      "description": "Brief description of this complaint in relation to the diagnosis",
+      "questions": [
+        {
+          "question": "Specific question to ask the patient",
+          "rationale": "Why this question is important for diagnosis/management"
+        }
+      ]
+    }
+  ]
+}
+
+Provide 3-5 most common presenting complaints, with 4-6 targeted questions for each complaint. Make the questions specific and clinically relevant for Nigerian medical students.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.1,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' },
+    });
+
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No response from OpenAI');
+    }
+
+    const parsed = JSON.parse(content);
+    
+    return {
+      success: true,
+      data: parsed,
+    };
+  } catch (error) {
+    console.error('Error generating HPC content:', error);
+    
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
 // Function to validate diagnosis input
 export function validateDiagnosisInput(diagnosis: string): {
   isValid: boolean;
