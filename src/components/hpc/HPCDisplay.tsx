@@ -235,7 +235,7 @@ export function HPCDisplay({ data, isLoading = false }: HPCDisplayProps) {
                         className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3"
                       >
                         <p className="font-medium text-slate-900 dark:text-slate-100 mb-2">
-                          {qIndex + 1}. "{q.question}"
+                          {qIndex + 1}. &ldquo;{q.question}&rdquo;
                         </p>
                         
                         {showRationales && (
@@ -263,7 +263,7 @@ export function HPCDisplay({ data, isLoading = false }: HPCDisplayProps) {
         <Card className="bg-amber-50/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
           <CardContent className="p-4">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              <span className="font-semibold">Remember:</span> Always adapt your questions based on the patient's responses 
+              <span className="font-semibold">Remember:</span> Always adapt your questions based on the patient&apos;s responses 
               and clinical context. This guide provides a framework, but clinical judgment is essential.
             </p>
           </CardContent>

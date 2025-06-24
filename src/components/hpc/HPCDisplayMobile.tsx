@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { HPCButton } from '@/components/ui/HPCButton';
 import { 
   ChevronDown, 
-  ChevronUp, 
   Lightbulb, 
   BookOpen, 
   Share2, 
@@ -274,7 +273,7 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
               >
                 <CardContent className="p-4">
                   <p className="font-medium text-slate-900 dark:text-slate-100 mb-3 leading-relaxed">
-                    "{question.question}"
+                    &ldquo;{question.question}&rdquo;
                   </p>
                   
                   {showRationales && (
