@@ -9,7 +9,7 @@ import { sanitizeDiagnosis, storage } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type Specialty = 'general' | 'pediatrics' | 'obs_gyn';
-type PediatricAge = '0-5' | '5-10' | '11-14' | '14+';
+type PediatricAge = '0-5' | '5-10' | '11-14' | '14+' | '';
 
 export function SearchInterface() {
   const [query, setQuery] = useState('');
@@ -64,7 +64,7 @@ export function SearchInterface() {
 
     // Navigate to the dedicated HPC page with specialty and age context
     const encodedDiagnosis = encodeURIComponent(finalQuery);
-    let params = new URLSearchParams();
+    const params = new URLSearchParams();
     
     if (specialty !== 'general') {
       params.set('specialty', specialty);

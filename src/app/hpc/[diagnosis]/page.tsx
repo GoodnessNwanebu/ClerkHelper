@@ -1,26 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { HPCDisplay } from '@/components/hpc/HPCDisplay';
-import { ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
-import { HPCButton } from '@/components/ui/HPCButton';
 import { useSearch } from '@/hooks/useSearch';
-
-interface HPCData {
-  diagnosis: string;
-  specialty: string;
-  presenting_complaints: Array<{
-    complaint: string;
-    description: string;
-    questions: Array<{
-      question: string;
-      rationale: string;
-    }>;
-  }>;
-}
+import { Loader2 } from 'lucide-react';
 
 export default function HPCPage() {
   const params = useParams();
@@ -30,10 +14,6 @@ export default function HPCPage() {
   const specialty = searchParams.get('specialty') || 'general';
   const patientAge = searchParams.get('age') || undefined;
   const { search, searchState } = useSearch();
-
-  const [hpcData, setHpcData] = useState<HPCData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (diagnosis && !searchState.hasSearched && !searchState.loading) {
@@ -107,12 +87,13 @@ export default function HPCPage() {
   // Show template if we have data
   if (searchState.data) {
     // Transform the data to match the HPCDisplay component structure
+    const templateData = searchState.data;
     const hpcData = {
-      diagnosis: searchState.data.diagnosis_name,
-      specialty: searchState.data.specialty,
-      presenting_complaints: searchState.data.sections.map(section => ({
+      diagnosis: templateData.diagnosis_name,
+      specialty: templateData.specialty,
+      presenting_complaints: templateData.sections.map(section => ({
         complaint: section.title,
-        description: `Common presentation in ${searchState.data.specialty.toLowerCase()}`,
+        description: `Common presentation in ${templateData.specialty.toLowerCase()}`,
         questions: section.questions.map(q => {
           if (typeof q === 'string') {
             return { question: q, rationale: 'Clinical assessment question' };
