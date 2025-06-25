@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, Clock, Sparkles } from 'lucide-react';
+import { Search, Loader2, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { sanitizeDiagnosis, storage } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -15,8 +14,6 @@ export function SearchInterface() {
   const [query, setQuery] = useState('');
   const [specialty, setSpecialty] = useState<Specialty>('general');
   const [pediatricAge, setPediatricAge] = useState<PediatricAge>('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Reset search state when component mounts (returning from HPC pages)
@@ -24,13 +21,6 @@ export function SearchInterface() {
     setQuery('');
     setSpecialty('general');
     setPediatricAge('');
-    setShowSuggestions(false);
-  }, []);
-
-  // Load recent searches from localStorage
-  useEffect(() => {
-    const recentSearches = storage.get<string[]>('recentSearches', []);
-    setSuggestions(recentSearches.slice(0, 5));
   }, []);
 
   // Reset pediatric age when switching away from pediatrics
@@ -43,7 +33,6 @@ export function SearchInterface() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    setShowSuggestions(value.length > 0);
   };
 
   const handleSearch = (searchQuery?: string) => {
@@ -84,14 +73,6 @@ export function SearchInterface() {
     
     const queryString = params.toString();
     window.location.href = `/hpc/${encodedDiagnosis}${queryString ? `?${queryString}` : ''}`;
-    
-    setShowSuggestions(false);
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    setShowSuggestions(false);
-    handleSearch(suggestion);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -103,7 +84,6 @@ export function SearchInterface() {
         break;
       case 'Escape':
         setQuery('');
-        setShowSuggestions(false);
         break;
       // Let all other keys (including space) pass through normally
       default:
@@ -213,7 +193,6 @@ export function SearchInterface() {
                   value={query}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  onFocus={() => setShowSuggestions(query.length > 0)}
                   className="border-0 bg-transparent text-theme-fg placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium"
                   style={{
                     height: 'clamp(3rem, 8vw, 4rem)',
@@ -262,7 +241,6 @@ export function SearchInterface() {
                     value={query}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    onFocus={() => setShowSuggestions(query.length > 0)}
                     className="border-0 bg-transparent pl-12 pr-4 text-theme-fg placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium"
                     style={{
                       height: 'clamp(3rem, 12vw, 4rem)',
@@ -303,32 +281,6 @@ export function SearchInterface() {
                 )}
               </button>
             </div>
-
-            {/* Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-2 right-2 mt-2 z-10">
-                <Card className="border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-100/50 dark:shadow-slate-900/50 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm">
-                  <CardContent className="p-0">
-                    <div className="max-h-60 overflow-y-auto">
-                      {suggestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors first:rounded-t-lg last:rounded-b-lg border-b border-slate-100 dark:border-slate-700 last:border-b-0"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Clock className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                            <span className="text-slate-900 dark:text-slate-100 font-medium">
-                              {suggestion}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </div>
         </div>
     </div>
