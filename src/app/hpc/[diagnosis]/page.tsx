@@ -1,9 +1,10 @@
 'use client';
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { HPCDisplay } from '@/components/hpc/HPCDisplay';
 import { useSearch } from '@/hooks/useSearch';
+import { offlineStorage, type OfflineConversation, type HPCResponse } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 export default function HPCPage() {
@@ -13,10 +14,28 @@ export default function HPCPage() {
   const diagnosis = decodeURIComponent(params.diagnosis as string);
   const specialty = searchParams.get('specialty') || 'general';
   const patientAge = searchParams.get('age') || undefined;
+  const isOfflineView = searchParams.get('offline') === 'true';
+  const conversationId = searchParams.get('id');
+  
   const { search, searchState } = useSearch();
+  const [offlineData, setOfflineData] = useState<OfflineConversation | null>(null);
 
+  // Load offline conversation if viewing offline
   useEffect(() => {
-    if (diagnosis && !searchState.hasSearched && !searchState.loading) {
+    if (isOfflineView && conversationId) {
+      const conversation = offlineStorage.getConversationById(conversationId);
+      if (conversation) {
+        setOfflineData(conversation);
+      } else {
+        // Conversation not found, redirect to offline page
+        router.push('/offline');
+      }
+    }
+  }, [isOfflineView, conversationId, router]);
+
+  // Normal search effect for online mode
+  useEffect(() => {
+    if (!isOfflineView && diagnosis && !searchState.hasSearched && !searchState.loading) {
       // Pass age parameter for pediatric cases
       const searchOptions = {
         diagnosis,
@@ -26,14 +45,71 @@ export default function HPCPage() {
       
       search(searchOptions.diagnosis, searchOptions.specialty, searchOptions.patient_age);
     }
-  }, [diagnosis, specialty, patientAge, search, searchState.hasSearched, searchState.loading]);
+  }, [isOfflineView, diagnosis, specialty, patientAge, search, searchState.hasSearched, searchState.loading]);
+
+  // Auto-save conversation when search completes successfully
+  useEffect(() => {
+    if (!isOfflineView && searchState.data && !searchState.loading && !searchState.error) {
+      try {
+        const templateData = searchState.data;
+        
+        // Convert specialty to storage format
+        const convertSpecialtyForStorage = (spec: string): HPCResponse['specialty'] => {
+          const specialtyMap: Record<string, HPCResponse['specialty']> = {
+            'cardiology': 'cardiology',
+            'respiratory': 'respiratory', 
+            'gastroenterology': 'gastroenterology',
+            'neurology': 'neurology',
+            'endocrinology': 'endocrinology',
+            'nephrology': 'nephrology',
+            'rheumatology': 'rheumatology',
+            'hematology': 'hematology',
+            'infectious_diseases': 'infectious diseases',
+            'emergency_medicine': 'emergency medicine',
+            'pediatrics': 'pediatrics',
+            'obstetrics_gynecology': 'obs & gynae'
+          };
+          return specialtyMap[spec] || 'emergency medicine';
+        };
+        
+        // Convert to HPCResponse format for storage
+        const hpcResponse: HPCResponse = {
+          diagnosis: templateData.diagnosis_name,
+          specialty: convertSpecialtyForStorage(templateData.specialty),
+          patient_age: parseInt(patientAge || '30'),
+          presenting_complaints: templateData.sections.map(section => ({
+            complaint: section.title,
+            description: `Common presentation in ${templateData.specialty.toLowerCase()}`,
+            questions: section.questions.map(q => {
+              if (typeof q === 'string') {
+                return { question: q, rationale: 'Clinical assessment question' };
+              }
+              return {
+                question: q.question,
+                rationale: q.clinical_rationale || q.hint || 'Clinical assessment question'
+              };
+            })
+          }))
+        };
+
+        // Save to offline storage
+        offlineStorage.saveConversation(hpcResponse);
+      } catch (error) {
+        console.error('Failed to save conversation:', error);
+      }
+    }
+  }, [isOfflineView, searchState.data, searchState.loading, searchState.error, patientAge]);
 
   const handleBack = () => {
-    router.push('/');
+    if (isOfflineView) {
+      router.push('/offline');
+    } else {
+      router.push('/');
+    }
   };
 
   // Show loading state while generating
-  if (searchState.loading) {
+  if (!isOfflineView && searchState.loading) {
     return (
       <div className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
         <div className="text-center">
@@ -58,7 +134,7 @@ export default function HPCPage() {
   }
 
   // Show error state if there was an error
-  if (searchState.error) {
+  if (!isOfflineView && searchState.error) {
     return (
       <div className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
@@ -84,8 +160,19 @@ export default function HPCPage() {
     );
   }
 
+  // Show offline data if in offline mode
+  if (isOfflineView && offlineData) {
+    const hpcData = {
+      diagnosis: offlineData.hpc.diagnosis,
+      specialty: offlineData.hpc.specialty,
+      presenting_complaints: offlineData.hpc.presenting_complaints
+    };
+
+    return <HPCDisplay data={hpcData} isLoading={false} />;
+  }
+
   // Show template if we have data
-  if (searchState.data) {
+  if (!isOfflineView && searchState.data) {
     // Transform the data to match the HPCDisplay component structure
     const templateData = searchState.data;
     const hpcData = {

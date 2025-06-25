@@ -19,6 +19,14 @@ export function SearchInterface() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset search state when component mounts (returning from HPC pages)
+  useEffect(() => {
+    setQuery('');
+    setSpecialty('general');
+    setPediatricAge('');
+    setShowSuggestions(false);
+  }, []);
+
   // Load recent searches from localStorage
   useEffect(() => {
     const recentSearches = storage.get<string[]>('recentSearches', []);
@@ -94,6 +102,7 @@ export function SearchInterface() {
         handleSearch();
         break;
       case 'Escape':
+        setQuery('');
         setShowSuggestions(false);
         break;
       // Let all other keys (including space) pass through normally

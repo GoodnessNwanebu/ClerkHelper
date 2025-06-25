@@ -1,6 +1,7 @@
 import { SearchInterface } from '@/components/search/SearchInterface';
 import { BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -8,13 +9,13 @@ export default function Home() {
       {/* Top Navigation Icons */}
       <div className="absolute top-4 sm:top-6 left-0 right-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
-          {/* Offline Files Icon - Top Left */}
-          <button className="group relative">
+          {/* Offline History Icon - Top Left */}
+          <Link href="/offline" className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-slate-100/50 dark:from-blue-900/30 dark:to-slate-800/30 rounded-xl blur-md group-hover:blur-lg transition-all duration-300"></div>
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300" />
             </div>
-          </button>
+          </Link>
 
           {/* Light/Dark Mode Toggle - Top Right */}
           <ThemeToggle />
