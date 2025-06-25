@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { SearchState, GenerateTemplateResponse } from '@/types';
+import type { SearchState, GenerateTemplateRequest, GenerateTemplateResponse } from '@/types';
+import { toast } from 'sonner';
 
 export function useSearch() {
   const [searchState, setSearchState] = useState<SearchState>({
@@ -12,9 +13,16 @@ export function useSearch() {
     hasSearched: false,
   });
 
-  const search = useCallback(async (query: string, specialty: string = 'general') => {
-    console.log('🔍 Search initiated:', { query: query.trim(), specialty });
-    
+  const search = useCallback(async (
+    query: string, 
+    specialty?: string,
+    patientAge?: string
+  ) => {
+    if (!query.trim()) {
+      toast.error('Please enter a diagnosis');
+      return;
+    }
+
     setSearchState(prev => ({
       ...prev,
       loading: true,
@@ -24,36 +32,26 @@ export function useSearch() {
     }));
 
     try {
-      console.log('📡 Making API request to /api/generate-template');
+      const requestBody: GenerateTemplateRequest = {
+        diagnosis: query.trim(),
+        specialty,
+        ...(patientAge && { patient_age: patientAge })
+      };
+
+      console.log('Sending request:', requestBody);
+
       const response = await fetch('/api/generate-template', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          diagnosis: query.trim(),
-          specialty: specialty,
-          use_cache: true,
-        }),
+        body: JSON.stringify(requestBody),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
       const result: GenerateTemplateResponse = await response.json();
-      console.log('✅ API response received:', { 
-        success: result.success, 
-        hasData: !!result.data,
-        specialty: result.data?.specialty 
-      });
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to generate template');
-      }
-
-      if (!result.data) {
-        throw new Error('No template data received');
       }
 
       setSearchState(prev => ({
@@ -62,27 +60,36 @@ export function useSearch() {
         loading: false,
         error: null,
       }));
+
+      // Show success message with generation info
+      const ageContext = patientAge ? ` for ${patientAge} year olds` : '';
+      const specialtyContext = specialty && specialty !== 'general' 
+        ? ` (${specialty === 'pediatrics' ? 'Pediatrics' : specialty === 'obs_gyn' ? 'Obs & Gyn' : specialty})` 
+        : '';
+      
+      toast.success(
+        `Generated PC/HPC questions for "${query}"${specialtyContext}${ageContext}`,
+        {
+          description: result.from_cache 
+            ? 'Retrieved from cache' 
+            : `Generated in ${result.generation_time ? Math.round(result.generation_time / 1000) : '~3'}s`,
+        }
+      );
+
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Search error:', error);
       
-      let errorMessage = 'Something went wrong. Please try again.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch')) {
-          errorMessage = 'Network error. Please check your connection and try again.';
-        } else if (error.message.includes('HTTP error')) {
-          errorMessage = 'Server error. Please try again later.';
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
       setSearchState(prev => ({
         ...prev,
-        data: null,
         loading: false,
         error: errorMessage,
+        data: null,
       }));
+
+      toast.error('Failed to generate template', {
+        description: errorMessage,
+      });
     }
   }, []);
 

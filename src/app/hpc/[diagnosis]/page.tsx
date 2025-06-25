@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { HPCDisplay } from '@/components/hpc/HPCDisplay';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { HPCButton } from '@/components/ui/HPCButton';
+import { useSearch } from '@/hooks/useSearch';
 
 interface HPCData {
   diagnosis: string;
@@ -23,176 +24,130 @@ interface HPCData {
 
 export default function HPCPage() {
   const params = useParams();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const diagnosis = decodeURIComponent(params.diagnosis as string);
   const specialty = searchParams.get('specialty') || 'general';
-  
+  const patientAge = searchParams.get('age') || undefined;
+  const { search, searchState } = useSearch();
+
   const [hpcData, setHpcData] = useState<HPCData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchHPCData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await fetch('/api/generate-hpc', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            diagnosis,
-            specialty,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to generate HPC content');
-        }
-
-        setHpcData(result.data);
-      } catch (err) {
-        console.error('Error fetching HPC data:', err);
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (diagnosis) {
-      fetchHPCData();
+    if (diagnosis && !searchState.hasSearched && !searchState.loading) {
+      // Pass age parameter for pediatric cases
+      const searchOptions = {
+        diagnosis,
+        specialty,
+        ...(specialty === 'pediatrics' && patientAge && { patient_age: patientAge })
+      };
+      
+      search(searchOptions.diagnosis, searchOptions.specialty, searchOptions.patient_age);
     }
-  }, [diagnosis, specialty]);
+  }, [diagnosis, specialty, patientAge, search, searchState.hasSearched, searchState.loading]);
 
-  const handleRetry = () => {
-    setError(null);
-    const fetchHPCData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await fetch('/api/generate-hpc', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            diagnosis,
-            specialty,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to generate HPC content');
-        }
-
-        setHpcData(result.data);
-      } catch (err) {
-        console.error('Error fetching HPC data:', err);
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHPCData();
+  const handleBack = () => {
+    router.push('/');
   };
 
-  if (error) {
+  // Show loading state while generating
+  if (searchState.loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-theme-bg via-theme-bg-secondary to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800/30">
-        <div className="container mx-auto px-4 py-8">
-          {/* Back Button */}
-          <div className="mb-6">
-            <Link href="/">
-              <HPCButton variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to ClerkSmart
-              </HPCButton>
-            </Link>
+      <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-xl"></div>
+            <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600" />
           </div>
-
-          {/* Error Display */}
-          <div className="max-w-2xl mx-auto">
-            <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20">
-              <CardContent className="p-6 text-center">
-                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
-                  Unable to Generate HPC Content
-                </h2>
-                <p className="text-red-700 dark:text-red-300 mb-4">
-                  {error}
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <HPCButton onClick={handleRetry} variant="secondary" size="sm">
-                    Try Again
-                  </HPCButton>
-                  <Link href="/">
-                    <HPCButton variant="ghost" size="sm">
-                      Go Back
-                    </HPCButton>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <h3 className="mt-6 text-lg font-semibold text-theme-fg">
+            Generating history template
+          </h3>
+          <p className="mt-2 text-sm text-theme-fg-secondary">
+            Creating comprehensive questions for &quot;{diagnosis}&quot;
+            {specialty !== 'general' && (
+              <span className="block mt-1 text-xs">
+                Specialty: {specialty === 'pediatrics' ? `Pediatrics${patientAge ? ` (${patientAge} years)` : ''}` : specialty === 'obs_gyn' ? 'Obstetrics & Gynecology' : specialty}
+              </span>
+            )}
+          </p>
         </div>
       </div>
     );
   }
 
-  return (
-    <>
-      {/* Mobile View - Full Screen */}
-      <div className="md:hidden">
-        {isLoading || !hpcData ? (
-          <HPCDisplay 
-            data={{
-              diagnosis: diagnosis,
-              specialty: specialty,
-              presenting_complaints: []
-            }} 
-            isLoading={true} 
-          />
-        ) : (
-          <HPCDisplay data={hpcData} />
-        )}
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden md:block min-h-screen bg-gradient-to-br from-theme-bg via-theme-bg-secondary to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800/30">
-        <div className="container mx-auto px-4 py-8">
-          {/* Back Button */}
-          <div className="mb-6">
-            <Link href="/">
-              <HPCButton variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to ClerkSmart
-              </HPCButton>
-            </Link>
+  // Show error state if there was an error
+  if (searchState.error) {
+    return (
+      <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+            <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
           </div>
-
-          {/* HPC Content */}
-          {isLoading || !hpcData ? (
-            <HPCDisplay 
-              data={{
-                diagnosis: diagnosis,
-                specialty: specialty,
-                presenting_complaints: []
-              }} 
-              isLoading={true} 
-            />
-          ) : (
-            <HPCDisplay data={hpcData} />
-          )}
+          <h3 className="mb-2 text-lg font-semibold text-red-900 dark:text-red-100">
+            Something went wrong
+          </h3>
+          <p className="mb-4 text-sm text-red-700 dark:text-red-200">
+            {searchState.error}
+          </p>
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Back to Search
+          </button>
         </div>
       </div>
-    </>
+    );
+  }
+
+  // Show template if we have data
+  if (searchState.data) {
+    // Transform the data to match the HPCDisplay component structure
+    const hpcData = {
+      diagnosis: searchState.data.diagnosis_name,
+      specialty: searchState.data.specialty,
+      presenting_complaints: searchState.data.sections.map(section => ({
+        complaint: section.title,
+        description: `Common presentation in ${searchState.data.specialty.toLowerCase()}`,
+        questions: section.questions.map(q => {
+          if (typeof q === 'string') {
+            return { question: q, rationale: 'Clinical assessment question' };
+          }
+          return {
+            question: q.question,
+            rationale: q.clinical_rationale || q.hint || 'Clinical assessment question'
+          };
+        })
+      }))
+    };
+
+    return (
+      <HPCDisplay
+        data={hpcData}
+        isLoading={false}
+      />
+    );
+  }
+
+  // Initial state - should trigger the search effect
+  return (
+    <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+      <div className="text-center">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-xl"></div>
+          <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600" />
+        </div>
+        <h3 className="mt-6 text-lg font-semibold text-theme-fg">
+          Preparing to generate template
+        </h3>
+        <p className="mt-2 text-sm text-theme-fg-secondary">
+          Initializing for &quot;{diagnosis}&quot;
+        </p>
+      </div>
+    </div>
   );
 } 

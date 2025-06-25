@@ -9,10 +9,12 @@ import { sanitizeDiagnosis, storage } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type Specialty = 'general' | 'pediatrics' | 'obs_gyn';
+type PediatricAge = '0-5' | '5-10' | '11-14' | '14+';
 
 export function SearchInterface() {
   const [query, setQuery] = useState('');
   const [specialty, setSpecialty] = useState<Specialty>('general');
+  const [pediatricAge, setPediatricAge] = useState<PediatricAge>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +24,13 @@ export function SearchInterface() {
     const recentSearches = storage.get<string[]>('recentSearches', []);
     setSuggestions(recentSearches.slice(0, 5));
   }, []);
+
+  // Reset pediatric age when switching away from pediatrics
+  useEffect(() => {
+    if (specialty !== 'pediatrics') {
+      setPediatricAge('');
+    }
+  }, [specialty]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -37,6 +46,12 @@ export function SearchInterface() {
       return;
     }
 
+    // Validate pediatric age selection
+    if (specialty === 'pediatrics' && !pediatricAge) {
+      toast.error('Please select patient age for pediatric cases');
+      return;
+    }
+
     setIsLoading(true);
 
     // Save to recent searches
@@ -47,10 +62,20 @@ export function SearchInterface() {
     ].slice(0, 10);
     storage.set('recentSearches', updatedSearches);
 
-    // Navigate to the dedicated HPC page with specialty context
+    // Navigate to the dedicated HPC page with specialty and age context
     const encodedDiagnosis = encodeURIComponent(finalQuery);
-    const specialtyParam = specialty !== 'general' ? `?specialty=${specialty}` : '';
-    window.location.href = `/hpc/${encodedDiagnosis}${specialtyParam}`;
+    let params = new URLSearchParams();
+    
+    if (specialty !== 'general') {
+      params.set('specialty', specialty);
+    }
+    
+    if (specialty === 'pediatrics' && pediatricAge) {
+      params.set('age', pediatricAge);
+    }
+    
+    const queryString = params.toString();
+    window.location.href = `/hpc/${encodedDiagnosis}${queryString ? `?${queryString}` : ''}`;
     
     setShowSuggestions(false);
   };
@@ -75,6 +100,14 @@ export function SearchInterface() {
       default:
         break;
     }
+  };
+
+  const getAgeButtonStyle = (age: PediatricAge) => {
+    return `px-3 py-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+      pediatricAge === age
+        ? 'bg-emerald-600 text-white shadow-sm'
+        : 'text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+    }`;
   };
 
   return (
@@ -116,6 +149,43 @@ export function SearchInterface() {
             </button>
           </div>
         </div>
+
+        {/* Age Selection - Only appears when Pediatrics is selected */}
+        {specialty === 'pediatrics' && (
+          <div className="mt-3 animate-in slide-in-from-top-2 duration-300 ease-out">
+            <div className="flex items-center justify-center px-fluid-1">
+              <div className="inline-flex items-center rounded-xl bg-emerald-50/80 dark:bg-emerald-900/20 backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-700/30 shadow-lg shadow-emerald-100/25 dark:shadow-emerald-900/25 p-1">
+                <span className="text-emerald-700 dark:text-emerald-300 font-medium px-3 py-1 text-xs">
+                  Patient age:
+                </span>
+                <button
+                  onClick={() => setPediatricAge('0-5')}
+                  className={getAgeButtonStyle('0-5')}
+                >
+                  0-5 yrs
+                </button>
+                <button
+                  onClick={() => setPediatricAge('5-10')}
+                  className={getAgeButtonStyle('5-10')}
+                >
+                  5-10 yrs
+                </button>
+                <button
+                  onClick={() => setPediatricAge('11-14')}
+                  className={getAgeButtonStyle('11-14')}
+                >
+                  11-14 yrs
+                </button>
+                <button
+                  onClick={() => setPediatricAge('14+')}
+                  className={getAgeButtonStyle('14+')}
+                >
+                  14+ yrs
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search Interface */}
@@ -130,7 +200,7 @@ export function SearchInterface() {
                 <Search className="absolute left-4 sm:left-6 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500 transition-colors group-focus-within:text-blue-500" />
                 <Input
                   type="text"
-                  placeholder={`Enter diagnosis${specialty === 'pediatrics' ? ' (pediatric)' : specialty === 'obs_gyn' ? ' (obs & gyn)' : ''}`}
+                  placeholder={`Enter diagnosis${specialty === 'pediatrics' ? ` (pediatric${pediatricAge ? `, ${pediatricAge} years` : ''})` : specialty === 'obs_gyn' ? ' (obs & gyn)' : ''}`}
                   value={query}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
@@ -146,7 +216,7 @@ export function SearchInterface() {
                 />
                 <Button
                   onClick={() => handleSearch()}
-                  disabled={!query.trim() || isLoading}
+                  disabled={!query.trim() || isLoading || (specialty === 'pediatrics' && !pediatricAge)}
                   className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-xl font-semibold text-white shadow-lg transition-all hover:shadow-xl focus:ring-2 focus:ring-offset-2 z-10 ${
                     specialty === 'pediatrics'
                       ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500/50'
@@ -179,7 +249,7 @@ export function SearchInterface() {
                   <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500 transition-colors group-focus-within:text-blue-500" />
                   <Input
                     type="text"
-                    placeholder={`Enter diagnosis${specialty === 'pediatrics' ? ' (pediatric)' : specialty === 'obs_gyn' ? ' (obs & gyn)' : ''}`}
+                    placeholder={`Enter diagnosis${specialty === 'pediatrics' ? ` (pediatric${pediatricAge ? `, ${pediatricAge} years` : ''})` : specialty === 'obs_gyn' ? ' (obs & gyn)' : ''}`}
                     value={query}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
@@ -198,55 +268,54 @@ export function SearchInterface() {
             {/* Mobile Generate Button - Outside the input group */}
             <div className="sm:hidden mt-4 text-center">
               <button
-                type="button"
                 onClick={() => handleSearch()}
-                disabled={!query.trim() || isLoading}
-                className={`inline-flex items-center gap-2 font-medium transition-all duration-200 py-3 px-4 min-h-[48px] touch-manipulation rounded-xl ${
-                  !query.trim() || isLoading
-                    ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                    : specialty === 'pediatrics'
-                    ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 hover:bg-emerald-50 dark:hover:bg-emerald-950'
+                disabled={!query.trim() || isLoading || (specialty === 'pediatrics' && !pediatricAge)}
+                className={`w-full max-w-xs py-3 px-6 rounded-2xl font-semibold text-white shadow-xl transition-all duration-300 hover:shadow-2xl focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  specialty === 'pediatrics'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200/40 focus:ring-emerald-500/50'
                     : specialty === 'obs_gyn'
-                    ? 'text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 active:scale-95 hover:bg-rose-50 dark:hover:bg-rose-950'
-                    : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 active:scale-95 hover:bg-blue-50 dark:hover:bg-blue-950'
+                    ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200/40 focus:ring-rose-500/50'
+                    : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200/40 focus:ring-blue-500/50'
                 }`}
-                style={{ fontSize: 'clamp(0.875rem, 4vw, 1rem)' }}
               >
                 {isLoading ? (
-                  <>
+                  <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
+                    <span>Generating...</span>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex items-center justify-center gap-2">
                     <Sparkles className="h-4 w-4" />
-                    Get HPC Guide
-                  </>
+                    <span>Get HPC Questions</span>
+                  </div>
                 )}
               </button>
             </div>
 
-            {/* Suggestions Dropdown - Positioned ABOVE the input */}
+            {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <Card className="absolute bottom-full z-50 mb-3 w-full border-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md shadow-2xl shadow-slate-200/60 dark:shadow-slate-900/60 ring-1 ring-black/5 dark:ring-white/10">
-                <CardContent className="p-2 sm:p-3">
-                  <div className="mb-2 sm:mb-3 flex items-center gap-2 px-2 sm:px-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    <Clock className="h-3 w-3" />
-                    Recent searches
-                  </div>
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-left font-medium text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 focus:bg-slate-50 dark:focus:bg-slate-700 focus:outline-none"
-                      style={{ fontSize: 'clamp(0.75rem, 3vw, 0.875rem)' }}
-                    >
-                      <Search className="h-3 w-3 text-slate-400 dark:text-slate-500 flex-shrink-0" />
-                      <span className="truncate">{suggestion}</span>
-                    </button>
-                  ))}
-                </CardContent>
-              </Card>
+              <div className="absolute top-full left-2 right-2 mt-2 z-10">
+                <Card className="border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-100/50 dark:shadow-slate-900/50 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm">
+                  <CardContent className="p-0">
+                    <div className="max-h-60 overflow-y-auto">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors first:rounded-t-lg last:rounded-b-lg border-b border-slate-100 dark:border-slate-700 last:border-b-0"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                            <span className="text-slate-900 dark:text-slate-100 font-medium">
+                              {suggestion}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         </div>

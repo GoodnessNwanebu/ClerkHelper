@@ -109,6 +109,7 @@ export interface GenerateTemplateRequest {
   diagnosis: string;
   specialty?: string;
   specialty_hint?: MedicalSpecialty;
+  patient_age?: string;
   use_cache?: boolean;
 }
 
@@ -124,11 +125,7 @@ export interface SearchInterfaceProps {
   suggestions?: string[];
 }
 
-export interface HistoryDisplayProps {
-  template: HistoryTemplate;
-  onBack?: () => void;
-  onCopy?: (section: HistorySection) => void;
-}
+// Removed HistoryDisplayProps as we're focusing on PC/HPC only
 
 export interface LoadingStateProps {
   message?: string;

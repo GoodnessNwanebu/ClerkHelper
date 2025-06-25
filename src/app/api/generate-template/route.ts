@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateHistoryTemplate, validateDiagnosisInput } from '@/lib/openai';
+import { generateHPCContent, validateDiagnosisInput } from '@/lib/openai';
 import type { GenerateTemplateRequest, GenerateTemplateResponse } from '@/types';
+import { MedicalSpecialty } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateTemplateRequest = await request.json();
-    const { diagnosis, specialty, specialty_hint } = body;
+    const { diagnosis, specialty, specialty_hint, patient_age } = body;
     
     // Use specialty parameter if provided, otherwise fall back to specialty_hint
     const finalSpecialty = specialty || specialty_hint;
@@ -33,33 +34,56 @@ export async function POST(request: NextRequest) {
       specialtyHint = undefined;
     }
 
-    console.log('Generating template for:', { 
+    console.log('Generating PC/HPC content for:', { 
       diagnosis, 
       originalSpecialty: finalSpecialty, 
-      mappedSpecialty: specialtyHint 
+      mappedSpecialty: specialtyHint,
+      patientAge: patient_age 
     });
 
-    // Generate new template using OpenAI
-    const llmResponse = await generateHistoryTemplate(diagnosis, specialtyHint);
+    // Generate new PC/HPC content using OpenAI with age parameter
+    const hpcResponse = await generateHPCContent(diagnosis, specialtyHint, patient_age);
 
-    if (!llmResponse.success) {
+    if (!hpcResponse.success) {
       return NextResponse.json<GenerateTemplateResponse>({
         success: false,
-        error: llmResponse.error || 'Failed to generate template',
+        error: hpcResponse.error || 'Failed to generate PC/HPC content',
       }, { status: 500 });
     }
 
-    // Return the LLM response with generation time
+    // Transform HPC response to match existing template structure
+    const sections = hpcResponse.data?.presenting_complaints.map((complaint, index) => ({
+      id: `complaint_${index + 1}`,
+      title: complaint.complaint,
+      questions: complaint.questions.map(q => ({
+        question: q.question,
+        clinical_rationale: q.rationale
+      })),
+      order: index + 1,
+      is_specialty_specific: true
+    })) || [];
+
+    // Map specialty string to enum value
+    let specialtyEnum: MedicalSpecialty;
+    if (specialtyHint === 'obstetrics_gynecology') {
+      specialtyEnum = MedicalSpecialty.OBSTETRICS_GYNECOLOGY;
+    } else if (specialtyHint === 'pediatrics') {
+      specialtyEnum = MedicalSpecialty.PEDIATRICS;
+    } else {
+      specialtyEnum = MedicalSpecialty.GENERAL;
+    }
+
+    // Return the transformed response
     return NextResponse.json<GenerateTemplateResponse>({
       success: true,
       data: {
         id: `temp_${Date.now()}`,
         diagnosis_id: '',
-        diagnosis_name: llmResponse.diagnosis_name,
-        specialty: llmResponse.specialty,
-        sections: llmResponse.sections,
+        diagnosis_name: hpcResponse.data?.diagnosis || diagnosis,
+        specialty: specialtyEnum,
+        sections: sections,
         generated_by: 'llm',
-        llm_model: llmResponse.model_used,
+        llm_model: 'gpt-4o-mini',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         cached: false,
