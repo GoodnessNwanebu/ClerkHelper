@@ -1,29 +1,22 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { Toaster } from '@/components/ui/sonner';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
-  title: 'ClerkSmart - Medical History Assistant',
-  description: 'Fast, mobile-first medical assistant app for structured history taking',
-  keywords: ['medical', 'history', 'diagnosis', 'medical students', 'clerking'],
+  title: 'ClerkSmart - AI Medical History Assistant',
+  description: 'Generate comprehensive history taking templates for medical diagnoses with AI assistance.',
+  keywords: 'medical history, clinical assessment, AI, healthcare, diagnosis',
   authors: [{ name: 'ClerkSmart Team' }],
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'ClerkSmart',
-  },
+  viewport: 'width=device-width, initial-scale=1',
 };
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  themeColor: '#2563eb',
-}
 
 export default function RootLayout({
   children,
@@ -31,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 antialiased">
         <ThemeProvider>
           {children}
           <Toaster />

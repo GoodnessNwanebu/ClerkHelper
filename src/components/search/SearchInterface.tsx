@@ -270,24 +270,27 @@ export function SearchInterface() {
               <button
                 onClick={() => handleSearch()}
                 disabled={!query.trim() || isLoading || (specialty === 'pediatrics' && !pediatricAge)}
-                className={`w-full max-w-xs py-3 px-6 rounded-2xl font-semibold text-white shadow-xl transition-all duration-300 hover:shadow-2xl focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  specialty === 'pediatrics'
-                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200/40 focus:ring-emerald-500/50'
+                className={`inline-flex items-center gap-2 font-medium transition-all duration-200 py-3 px-4 min-h-[48px] touch-manipulation rounded-xl ${
+                  !query.trim() || isLoading || (specialty === 'pediatrics' && !pediatricAge)
+                    ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                    : specialty === 'pediatrics'
+                    ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 active:scale-95 hover:bg-emerald-50 dark:hover:bg-emerald-950'
                     : specialty === 'obs_gyn'
-                    ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200/40 focus:ring-rose-500/50'
-                    : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200/40 focus:ring-blue-500/50'
+                    ? 'text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 active:scale-95 hover:bg-rose-50 dark:hover:bg-rose-950'
+                    : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 active:scale-95 hover:bg-blue-50 dark:hover:bg-blue-950'
                 }`}
+                style={{ fontSize: 'clamp(0.875rem, 4vw, 1rem)' }}
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
+                  <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Generating...</span>
-                  </div>
+                    Generating...
+                  </>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
+                  <>
                     <Sparkles className="h-4 w-4" />
-                    <span>Get HPC Questions</span>
-                  </div>
+                    Get HPC Questions
+                  </>
                 )}
               </button>
             </div>

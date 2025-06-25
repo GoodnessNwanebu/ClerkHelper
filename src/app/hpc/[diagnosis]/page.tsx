@@ -35,16 +35,16 @@ export default function HPCPage() {
   // Show loading state while generating
   if (searchState.loading) {
     return (
-      <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 blur-xl"></div>
             <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600" />
           </div>
-          <h3 className="mt-6 text-lg font-semibold text-theme-fg">
-            Generating history template
+          <h3 className="mt-6 text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Generate HPC
           </h3>
-          <p className="mt-2 text-sm text-theme-fg-secondary">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             Creating comprehensive questions for &quot;{diagnosis}&quot;
             {specialty !== 'general' && (
               <span className="block mt-1 text-xs">
@@ -60,7 +60,7 @@ export default function HPCPage() {
   // Show error state if there was an error
   if (searchState.error) {
     return (
-      <div className="min-h-screen bg-theme-bg dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
             <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

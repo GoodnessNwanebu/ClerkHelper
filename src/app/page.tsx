@@ -4,7 +4,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-theme-bg via-theme-bg-secondary to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800/30 relative transition-colors duration-300">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 relative transition-colors duration-300">
       {/* Top Navigation Icons */}
       <div className="absolute top-4 sm:top-6 left-0 right-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
