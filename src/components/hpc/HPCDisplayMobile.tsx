@@ -269,7 +269,7 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
       </div>
 
       {/* Current Complaint */}
-      <div className={`flex-1 overflow-y-auto p-4 ${isPWA ? 'pb-24' : ''}`}>
+      <div className={`flex-1 overflow-y-auto p-4 ${isPWA ? 'pb-32' : ''}`}>
         <div className="max-w-lg mx-auto space-y-6">
           {/* Complaint Header */}
           <div className="text-center space-y-3">
@@ -320,7 +320,7 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
           ? 'fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom shadow-lg border-t-2 border-t-blue-100 dark:border-t-blue-900' 
           : ''
       }`}>
-        <div className={`p-4 ${isPWA ? 'pb-safe' : ''}`}>
+        <div className={`${isPWA ? 'px-4 pt-6 pb-8' : 'p-4'}`}>
           <div className="flex gap-3 max-w-lg mx-auto">
             <HPCButton
               onClick={handlePrevious}
@@ -328,11 +328,11 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
               variant="navigation"
               size="lg"
               className={`flex-1 ${isPWA 
-                ? 'h-14 text-base font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200' 
+                ? 'h-16 text-lg font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 rounded-2xl' 
                 : 'h-12'
               }`}
             >
-              <ArrowLeft className={`${isPWA ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
+              <ArrowLeft className={`${isPWA ? 'h-6 w-6' : 'h-4 w-4'} mr-2`} />
               Previous
             </HPCButton>
             
@@ -342,12 +342,12 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
               variant="primary"
               size="lg"
               className={`flex-1 ${isPWA 
-                ? 'h-14 text-base font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200' 
+                ? 'h-16 text-lg font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 rounded-2xl' 
                 : 'h-12'
               }`}
             >
               Next
-              <ChevronDown className={`${isPWA ? 'h-5 w-5' : 'h-4 w-4'} ml-2 rotate-[-90deg]`} />
+              <ChevronDown className={`${isPWA ? 'h-6 w-6' : 'h-4 w-4'} ml-2 rotate-[-90deg]`} />
             </HPCButton>
           </div>
         </div>
