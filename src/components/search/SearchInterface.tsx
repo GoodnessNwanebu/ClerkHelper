@@ -16,11 +16,41 @@ export function SearchInterface() {
   const [pediatricAge, setPediatricAge] = useState<PediatricAge>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset search state when component mounts (returning from HPC pages)
+  // Reset search state when component mounts or when navigating back
   useEffect(() => {
-    setQuery('');
-    setSpecialty('general');
-    setPediatricAge('');
+    const resetSearch = () => {
+      setQuery('');
+      setSpecialty('general');
+      setPediatricAge('');
+      setIsLoading(false);
+    };
+
+    // Reset on mount
+    resetSearch();
+
+    // Also reset when the window regains focus (user comes back from another page)
+    const handleFocus = () => {
+      // Only reset if we're actually on the home page
+      if (window.location.pathname === '/') {
+        resetSearch();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    // Reset when the page becomes visible (handles browser tab switching)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && window.location.pathname === '/') {
+        resetSearch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Reset pediatric age when switching away from pediatrics

@@ -110,7 +110,7 @@ Provide your response in this exact JSON format:
   ]
 }
 
-Generate at least 4 presenting complaints with 5-7 questions each. Make questions conversational with varied phrasing, and insights clinically specific and educational. Focus on what students need to recognize patterns and make clinical decisions.`;
+Generate 4-6 presenting complaints with 5-7 questions each. Make questions conversational with varied phrasing, and insights clinically specific and educational. Focus on what students need to recognize patterns and make clinical decisions.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

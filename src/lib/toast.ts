@@ -10,26 +10,29 @@ import { toast as sonnerToast } from 'sonner';
 export const toast = {
   /**
    * Success toast with green theming
+   * Auto-dismisses after 3 seconds (standard for success confirmations)
    */
   success: (message: string, options?: { description?: string; duration?: number }) => {
     return sonnerToast.success(message, {
       description: options?.description,
-      duration: options?.duration || 4000,
+      duration: options?.duration || 3000, // 3 seconds for quick confirmations
     });
   },
 
   /**
    * Error toast with red theming
+   * Manual dismiss only - errors need user acknowledgment
    */
   error: (message: string, options?: { description?: string; duration?: number }) => {
     return sonnerToast.error(message, {
       description: options?.description,
-      duration: options?.duration || 5000, // Longer for errors
+      duration: options?.duration || Infinity, // Manual dismiss for errors
     });
   },
 
   /**
    * Info toast with blue theming
+   * 4 seconds for informational content
    */
   info: (message: string, options?: { description?: string; duration?: number }) => {
     return sonnerToast.info(message, {
@@ -40,11 +43,12 @@ export const toast = {
 
   /**
    * Warning toast with amber theming
+   * 5 seconds for warnings that need attention
    */
   warning: (message: string, options?: { description?: string; duration?: number }) => {
     return sonnerToast.warning(message, {
       description: options?.description,
-      duration: options?.duration || 4500,
+      duration: options?.duration || 5000, // Bit longer for warnings
     });
   },
 

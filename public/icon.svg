@@ -1,0 +1,38 @@
+
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="252" fill="url(#bg)" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Stethoscope design -->
+  <g transform="translate(256, 256)" fill="#ffffff" filter="url(#shadow)">
+    <!-- Main tube -->
+    <path d="M-25,-20 Q-30,-10 -25,0 Q-20,10 -10,15 Q0,20 10,15 Q20,10 25,0 Q30,-10 25,-20" 
+          stroke="#ffffff" stroke-width="3" fill="none"/>
+    
+    <!-- Left earpiece -->
+    <circle cx="-25" cy="-20" r="4" fill="#ffffff"/>
+    <path d="M-25,-24 Q-30,-30 -35,-25 Q-30,-20 -25,-24" stroke="#ffffff" stroke-width="2" fill="none"/>
+    
+    <!-- Right earpiece -->
+    <circle cx="25" cy="-20" r="4" fill="#ffffff"/>
+    <path d="M25,-24 Q30,-30 35,-25 Q30,-20 25,-24" stroke="#ffffff" stroke-width="2" fill="none"/>
+    
+    <!-- Chest piece -->
+    <circle cx="0" cy="20" r="8" fill="#ffffff" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="0" cy="20" r="5" fill="none" stroke="#1e40af" stroke-width="1"/>
+    
+    <!-- Medical cross on chest piece -->
+    <path d="M-2,16 L2,16 L2,18 L4,18 L4,22 L2,22 L2,24 L-2,24 L-2,22 L-4,22 L-4,18 L-2,18 Z" 
+          fill="#ef4444"/>
+  </g>
+</svg>
