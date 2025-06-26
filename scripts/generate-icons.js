@@ -8,43 +8,52 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
-// Create SVG content for a medical stethoscope icon
+// Create SVG content for a clean, modern medical icon
 const createSVG = (size, bgColor = '#2563eb', iconColor = '#ffffff') => `
 <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:${bgColor};stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2563eb;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
     </linearGradient>
     <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
     </filter>
   </defs>
   
-  <!-- Background circle -->
-  <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 4}" fill="url(#bg)" stroke="#1e40af" stroke-width="2"/>
+  <!-- Background with subtle radius -->
+  <rect x="0" y="0" width="${size}" height="${size}" rx="${size * 0.15}" fill="url(#bg)" />
   
-  <!-- Stethoscope design -->
+  <!-- Main icon group -->
   <g transform="translate(${size/2}, ${size/2})" fill="${iconColor}" filter="url(#shadow)">
-    <!-- Main tube -->
-    <path d="M-25,-20 Q-30,-10 -25,0 Q-20,10 -10,15 Q0,20 10,15 Q20,10 25,0 Q30,-10 25,-20" 
-          stroke="${iconColor}" stroke-width="3" fill="none"/>
     
-    <!-- Left earpiece -->
-    <circle cx="-25" cy="-20" r="4" fill="${iconColor}"/>
-    <path d="M-25,-24 Q-30,-30 -35,-25 Q-30,-20 -25,-24" stroke="${iconColor}" stroke-width="2" fill="none"/>
-    
-    <!-- Right earpiece -->
-    <circle cx="25" cy="-20" r="4" fill="${iconColor}"/>
-    <path d="M25,-24 Q30,-30 35,-25 Q30,-20 25,-24" stroke="${iconColor}" stroke-width="2" fill="none"/>
-    
-    <!-- Chest piece -->
-    <circle cx="0" cy="20" r="8" fill="${iconColor}" stroke="${iconColor}" stroke-width="2"/>
-    <circle cx="0" cy="20" r="5" fill="none" stroke="#1e40af" stroke-width="1"/>
-    
-    <!-- Medical cross on chest piece -->
-    <path d="M-2,16 L2,16 L2,18 L4,18 L4,22 L2,22 L2,24 L-2,24 L-2,22 L-4,22 L-4,18 L-2,18 Z" 
-          fill="#ef4444"/>
+    <!-- Medical clipboard/chart icon -->
+    <g transform="scale(${size/100})">
+      <!-- Clipboard background -->
+      <rect x="-18" y="-20" width="36" height="40" rx="2" fill="${iconColor}" opacity="0.9"/>
+      <rect x="-16" y="-18" width="32" height="36" rx="1" fill="#1e40af" opacity="0.3"/>
+      
+      <!-- Clip at top -->
+      <rect x="-6" y="-22" width="12" height="6" rx="1" fill="${iconColor}" opacity="0.8"/>
+      
+      <!-- Text lines on clipboard -->
+      <rect x="-12" y="-12" width="16" height="2" rx="1" fill="#1e40af" opacity="0.6"/>
+      <rect x="-12" y="-7" width="20" height="2" rx="1" fill="#1e40af" opacity="0.6"/>
+      <rect x="-12" y="-2" width="18" height="2" rx="1" fill="#1e40af" opacity="0.6"/>
+      <rect x="-12" y="3" width="14" height="2" rx="1" fill="#1e40af" opacity="0.6"/>
+      
+      <!-- Medical cross accent -->
+      <g transform="translate(12, -8)" fill="#ef4444">
+        <rect x="-1.5" y="-4" width="3" height="8" rx="1"/>
+        <rect x="-4" y="-1.5" width="8" height="3" rx="1"/>
+      </g>
+      
+      <!-- Stylized "C" for ClerkSmart -->
+      <g transform="translate(-20, 8)" fill="${iconColor}" opacity="0.8">
+        <path d="M -4 -6 Q -8 -6 -8 -2 Q -8 2 -4 2 L -2 2 L -2 0 L -4 0 Q -6 0 -6 -2 Q -6 -4 -4 -4 L -2 -4 L -2 -6 Z" />
+      </g>
+    </g>
   </g>
 </svg>`;
 
@@ -81,7 +90,7 @@ const faviconSizes = [
 ];
 
 async function generateIcons() {
-  console.log('🎨 Generating PWA icons for ClerkSmart...');
+  console.log('🎨 Generating BEAUTIFUL PWA icons for ClerkSmart...');
   
   try {
     // Generate PWA icons
@@ -91,7 +100,7 @@ async function generateIcons() {
       
       await sharp(svgBuffer)
         .resize(icon.size, icon.size)
-        .png({ quality: 90, compressionLevel: 9 })
+        .png({ quality: 95, compressionLevel: 9 })
         .toFile(outputPath);
       
       console.log(`✅ Generated ${icon.name}`);
@@ -104,7 +113,7 @@ async function generateIcons() {
       
       await sharp(svgBuffer)
         .resize(icon.size, icon.size)
-        .png({ quality: 90, compressionLevel: 9 })
+        .png({ quality: 95, compressionLevel: 9 })
         .toFile(outputPath);
       
       console.log(`🍎 Generated ${icon.name}`);
@@ -117,7 +126,7 @@ async function generateIcons() {
       
       await sharp(svgBuffer)
         .resize(icon.size, icon.size)
-        .png({ quality: 90, compressionLevel: 9 })
+        .png({ quality: 95, compressionLevel: 9 })
         .toFile(outputPath);
       
       console.log(`🔖 Generated ${icon.name}`);
@@ -127,14 +136,21 @@ async function generateIcons() {
     const svgBuffer = Buffer.from(createSVG(32));
     await sharp(svgBuffer)
       .resize(32, 32)
-      .png({ quality: 90, compressionLevel: 9 })
+      .png({ quality: 95, compressionLevel: 9 })
       .toFile(path.join(publicDir, 'favicon.png'));
+    
+    // Copy as favicon.ico
+    await sharp(svgBuffer)
+      .resize(32, 32)
+      .png({ quality: 95, compressionLevel: 9 })
+      .toFile(path.join(publicDir, 'favicon.ico'));
     
     // Generate source SVG for reference
     fs.writeFileSync(path.join(publicDir, 'icon.svg'), createSVG(512));
     
-    console.log('🎉 All icons generated successfully!');
+    console.log('🎉 GORGEOUS icons generated successfully!');
     console.log(`📁 Icons saved to: ${publicDir}`);
+    console.log('🚀 Much cleaner design with medical clipboard + "C" branding!');
     
   } catch (error) {
     console.error('❌ Error generating icons:', error);

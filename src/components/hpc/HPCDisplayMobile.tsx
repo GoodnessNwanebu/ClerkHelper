@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { HPCButton } from '@/components/ui/HPCButton';
 import { 
@@ -40,6 +40,29 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
   const [currentComplaintIndex, setCurrentComplaintIndex] = useState(0);
   const [showRationales, setShowRationales] = useState(false);
   const [showComplaintsList, setShowComplaintsList] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
+
+  // Detect PWA mode
+  useEffect(() => {
+    const checkPWAMode = () => {
+      // Check if running in standalone mode (PWA)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      // Also check for iOS PWA
+      const isIOSPWA = (window.navigator as any).standalone === true;
+      // Check for Android PWA indicator
+      const isAndroidPWA = document.referrer.includes('android-app://');
+      
+      setIsPWA(isStandalone || isIOSPWA || isAndroidPWA);
+    };
+
+    checkPWAMode();
+    
+    // Listen for display mode changes
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    mediaQuery.addEventListener('change', checkPWAMode);
+    
+    return () => mediaQuery.removeEventListener('change', checkPWAMode);
+  }, []);
 
   const currentComplaint = data.presenting_complaints[currentComplaintIndex];
   const totalComplaints = data.presenting_complaints.length;
@@ -55,8 +78,6 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
       setCurrentComplaintIndex(currentComplaintIndex - 1);
     }
   };
-
-
 
   const handleShare = async () => {
     const shareText = `ClerkSmart HPC - ${data.diagnosis}\n\n${currentComplaint.complaint}\n\n${currentComplaint.questions
@@ -248,7 +269,7 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
       </div>
 
       {/* Current Complaint */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className={`flex-1 overflow-y-auto p-4 ${isPWA ? 'pb-24' : ''}`}>
         <div className="max-w-lg mx-auto space-y-6">
           {/* Complaint Header */}
           <div className="text-center space-y-3">
@@ -293,32 +314,43 @@ export function HPCDisplayMobile({ data, isLoading = false }: HPCDisplayMobilePr
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4">
-        <div className="flex gap-3 max-w-lg mx-auto">
-          <HPCButton
-            onClick={handlePrevious}
-            disabled={currentComplaintIndex === 0}
-            variant="navigation"
-            size="lg"
-            className="flex-1 h-12"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </HPCButton>
-          
-          <HPCButton
-            onClick={handleNext}
-            disabled={currentComplaintIndex === totalComplaints - 1}
-            variant="primary"
-            size="lg"
-            className="flex-1 h-12"
-          >
-            Next
-            <ChevronDown className="h-4 w-4 ml-2 rotate-[-90deg]" />
-          </HPCButton>
+      {/* Bottom Navigation - PWA Optimized */}
+      <div className={`bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 ${
+        isPWA 
+          ? 'fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom shadow-lg border-t-2 border-t-blue-100 dark:border-t-blue-900' 
+          : ''
+      }`}>
+        <div className={`p-4 ${isPWA ? 'pb-safe' : ''}`}>
+          <div className="flex gap-3 max-w-lg mx-auto">
+            <HPCButton
+              onClick={handlePrevious}
+              disabled={currentComplaintIndex === 0}
+              variant="navigation"
+              size="lg"
+              className={`flex-1 ${isPWA 
+                ? 'h-14 text-base font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200' 
+                : 'h-12'
+              }`}
+            >
+              <ArrowLeft className={`${isPWA ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
+              Previous
+            </HPCButton>
+            
+            <HPCButton
+              onClick={handleNext}
+              disabled={currentComplaintIndex === totalComplaints - 1}
+              variant="primary"
+              size="lg"
+              className={`flex-1 ${isPWA 
+                ? 'h-14 text-base font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200' 
+                : 'h-12'
+              }`}
+            >
+              Next
+              <ChevronDown className={`${isPWA ? 'h-5 w-5' : 'h-4 w-4'} ml-2 rotate-[-90deg]`} />
+            </HPCButton>
+          </div>
         </div>
-
       </div>
     </div>
   );
